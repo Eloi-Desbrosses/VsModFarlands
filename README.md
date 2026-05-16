@@ -43,24 +43,40 @@ generate than vanilla; chunks past the ring are untouched.
 
 ## Configuration
 
-The ring auto-scales with your world size — by default Far Lands cover ~30% of
-the map surface, leaving ~70% vanilla. Three environment variables override the
-defaults if you want a different ratio. All values are integers in blocks.
+When you create a new world, the **Customize** screen has a single slider:
 
-| Variable           | Default                              | Meaning                                        |
-|--------------------|--------------------------------------|------------------------------------------------|
-| `VSFL_DEPTH`       | `min(mapX, mapZ) / 12` (clamped 60k–2M) | Total ring thickness from each border inwards. |
-| `VSFL_BAND`        | `VSFL_DEPTH / 7`                     | Width of each of the 7 concentric bands.       |
-| `VSFL_TUNNEL_LIFT` | 40                                   | How many blocks Tunnel raises vanilla terrain. |
+> **Far Lands coverage (%)** — 0 to 100, default **30**.
 
-The default Vintage Story world is 1 024 000 × 1 024 000 blocks centered at
-(512 000, 512 000). On that world the ring is **85 000 blocks deep** from each
-border, with **bands of ~12 200 blocks** each. Every biome sits between
-coordinate 0 and 85 000 along either axis.
+This is the fraction of your map's surface that the Far Lands ring will cover.
+The ring is anchored at each world border and scales with your world size, so
+30% on a 1 024 000-block world and 30% on a 65 000 000-block world both feel
+proportionally similar — a border crust occupying the same fraction of the
+playable surface.
 
-For larger worlds the ring grows proportionally up to a 2 000 000-block cap;
-for smaller worlds the ring floors at 60 000 blocks so the bands stay wide
-enough to read.
+| Coverage | What you get |
+|----------|--------------|
+| 0%       | Mod is effectively disabled for this world. |
+| 10%      | Thin border crust. You'll only notice the Far Lands if you deliberately walk to a border. |
+| 30%      | Recommended. Far Lands feel like a strong border phenomenon; vanilla still dominates the playable area (~70%). |
+| 50%      | Far Lands and vanilla are roughly equal. The ring is a major destination. |
+| 100%     | Every chunk of the world is a Far Lands biome. No vanilla center exists. |
+
+On the default 1 024 000-block world at 30% coverage, the ring is about
+85 000 blocks deep from each border, with bands of about 12 200 blocks each.
+Every biome sits between coordinate 0 and 85 000 along either axis.
+
+### Advanced overrides (servers, Docker)
+
+For headless / dedicated deployments where the customize-world UI isn't
+practical, three environment variables override the slider:
+
+| Variable           | Default                          | Meaning                                        |
+|--------------------|----------------------------------|------------------------------------------------|
+| `VSFL_DEPTH`       | derived from coverage % + world  | Total ring thickness from each border inwards. |
+| `VSFL_BAND`        | `VSFL_DEPTH / 7`                 | Width of each of the 7 concentric bands.       |
+| `VSFL_TUNNEL_LIFT` | 40                               | How many blocks Tunnel raises vanilla terrain. |
+
+Env vars take precedence over the world-config slider when present.
 
 ## Suggested coordinates
 

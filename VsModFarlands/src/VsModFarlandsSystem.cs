@@ -90,13 +90,17 @@ public class VsModFarlandsSystem : ModSystem
         _mapSizeX = api.WorldManager.MapSizeX;
         _mapSizeZ = api.WorldManager.MapSizeZ;
 
-        // Auto-scale ring with world size: ~30% of total area is Far Lands.
-        // Floor 60k keeps bands wide enough to read on tiny worlds.
-        // Ceiling 2M keeps worldgen cost bounded on huge worlds.
-        int defaultDepth = Math.Clamp(Math.Min(_mapSizeX, _mapSizeZ) / 12, 60_000, 2_000_000);
-        _depth     = ReadIntEnv("VSFL_DEPTH", defaultDepth);
-        _bandWidth = ReadIntEnv("VSFL_BAND", Math.Max(1, _depth / 7));
-        _numBands  = Math.Max(1, _depth / _bandWidth);
+        // Coverage % is set per-world via the Customize World UI (slider 0-100, default 30).
+        // Math: vanilla side = world × sqrt(1 - C), so depth = world × (1 - sqrt(1 - C)) / 2.
+        // Env var VSFL_DEPTH overrides everything (Docker/server deployments).
+        int coveragePct = Math.Clamp(api.World.Config.GetInt("farLandsCoverage", 30), 0, 100);
+        double coverage = coveragePct / 100.0;
+        int worldMin = Math.Min(_mapSizeX, _mapSizeZ);
+        int derivedDepth = (int)(worldMin * (1.0 - Math.Sqrt(1.0 - coverage)) / 2.0);
+
+        _depth     = ReadIntEnv("VSFL_DEPTH", derivedDepth);
+        _bandWidth = ReadIntEnv("VSFL_BAND",  Math.Max(1, _depth / 7));
+        _numBands  = Math.Max(1, _depth / Math.Max(1, _bandWidth));
 
         _air = 0;
         _stone  = Resolve("rock-granite", "rock-andesite");
@@ -106,8 +110,8 @@ public class VsModFarlandsSystem : ModSystem
         _water  = Resolve("water-still-7", "water-flowing-7");
 
         api.Logger.Notification(
-            "[FarLands] mapSize=({0},{1}) depth={2} band={3} numBands={4} (auto-scaled from world size)",
-            _mapSizeX, _mapSizeZ, _depth, _bandWidth, _numBands);
+            "[FarLands] coverage={0}% mapSize=({1},{2}) depth={3} band={4} numBands={5}",
+            coveragePct, _mapSizeX, _mapSizeZ, _depth, _bandWidth, _numBands);
         api.Logger.Notification(
             "[FarLands] ring on x in [0,{0}] u [{1},{2}], same on z",
             _depth, _mapSizeX - _depth, _mapSizeX);

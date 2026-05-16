@@ -10,7 +10,9 @@ This mod brings that pilgrimage to Vintage Story.
 
 ## What you get
 
-The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border that auto-scales with your world size, covering roughly 30% of the surface (70% stays vanilla). On the default 1 024 000-block world the ring is 85 000 blocks deep from each border. Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).
+The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border, sized by a single slider on the world-creation screen: **Far Lands coverage (%)**, from 0 (disabled) to 100 (entire world). The default 30% leaves vanilla as roughly 70% of the surface while still making the ring a serious border destination. Whatever you pick, the ring scales with your world size, so the same percentage feels proportionally similar on a 1M and a 65M world.
+
+Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).
 
 Walk outward from the centre toward any border and you cross seven concentric bands. Each band is one-seventh of the ring depth (about 12 200 blocks on the default world). Each band has a different glitch, escalating as you approach the edge of the world.
 
@@ -66,15 +68,15 @@ Clients do not install the mod and never even download it. All 14 biomes use sto
 
 ## Configuration
 
-The ring auto-scales with your world size. Three environment variables override the defaults if needed:
+A single slider on the **Customize World** screen controls everything:
 
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `VSFL_DEPTH` | `min(mapX, mapZ) / 12`, clamped to [60 000, 2 000 000] | Total ring thickness from each border. |
-| `VSFL_BAND`  | `VSFL_DEPTH / 7` | Width of each of the 7 concentric bands. |
-| `VSFL_TUNNEL_LIFT` | 40 | Blocks the Tunnel biome raises vanilla terrain by. |
+| Setting | Range | Default | Meaning |
+|---------|-------|---------|---------|
+| Far Lands coverage (%) | 0–100, step 5 | 30 | Fraction of map surface covered by Far Lands biomes. Scales with world size. |
 
-Set `VSFL_DEPTH` larger for a wider Far Lands crust, smaller for a tighter one. The 7-band ratio is preserved automatically when only `VSFL_DEPTH` is set.
+Pick 0 to disable the mod for a specific world. Pick 100 if you want the entire map to be glitched. Most playthroughs land between 20 and 50.
+
+For dedicated servers or Docker deployments where the UI isn't practical, three environment variables override the slider: `VSFL_DEPTH` (ring thickness from each border in blocks), `VSFL_BAND` (band width, defaults to `VSFL_DEPTH / 7`), and `VSFL_TUNNEL_LIFT` (Tunnel raise height, default 40).
 
 ---
 

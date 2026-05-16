@@ -3,10 +3,24 @@
   "modid": "vsmodfarlands",
   "name": "Far Lands",
   "authors": ["Spinnn"],
-  "description": "Replicates the 14 iconic Minecraft Far Lands biomes (Skygrid, NetherGrid, EndIsland, Stripe, Strip, Corner, Farther, 64-bit, Vertex, Comb, Pole, Edge Loop, Tunnel, Nothingness) as a worldgen ring around the map border. Each band of distance from the border picks a different glitched terrain type. Pure worldgen, zero runtime cost outside the ring.",
-  "version": "0.1.1",
+  "description": "Replicates the 14 iconic Minecraft Far Lands biomes (Skygrid, NetherGrid, EndIsland, Stripe, Strip, Corner, Farther, 64-bit, Vertex, Comb, Pole, Edge Loop, Tunnel, Nothingness) as a worldgen ring around the map border. Coverage is configurable from 0% (disabled) to 100% (entire world) and scales with your world size. Pure worldgen, zero runtime cost outside the ring.",
+  "version": "0.1.2",
   "side": "server",
   "dependencies": {
     "game": "1.22.2"
-  }
+  },
+  "worldConfigAttributes": [
+    {
+      "category": "worldgen",
+      "code": "farLandsCoverage",
+      "dataType": "intrange",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "name": "Far Lands coverage (%)",
+      "default": "30",
+      "description": "Percentage of map surface covered by Far Lands biomes. 0 disables the mod for this world; 100 makes every chunk Far Lands. Scales with the world size you picked. 30% is recommended for a balanced experience.",
+      "onlyDuringWorldCreate": true
+    }
+  ]
 }
