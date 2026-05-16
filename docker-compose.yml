@@ -1,0 +1,11 @@
+services:
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vsmod-farlands-build:latest
+    volumes:
+      - ./VsModFarlands:/src/VsModFarlands
+      - ./build:/out
+    working_dir: /src/VsModFarlands
+    command: dotnet build VsModFarlands.csproj -c Release -o /out --nologo

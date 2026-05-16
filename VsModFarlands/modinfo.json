@@ -1,0 +1,12 @@
+{
+  "type": "code",
+  "modid": "vsmodfarlands",
+  "name": "Far Lands",
+  "authors": ["Spinnn"],
+  "description": "Replicates the 14 iconic Minecraft Far Lands biomes (Skygrid, NetherGrid, EndIsland, Stripe, Strip, Corner, Farther, 64-bit, Vertex, Comb, Pole, Edge Loop, Tunnel, Nothingness) as a worldgen ring around the map border. Each band of distance from the border picks a different glitched terrain type. Pure worldgen, zero runtime cost outside the ring.",
+  "version": "0.1.0",
+  "side": "server",
+  "dependencies": {
+    "game": "1.22.2"
+  }
+}
