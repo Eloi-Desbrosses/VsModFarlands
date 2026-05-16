@@ -10,33 +10,33 @@ This mod brings that pilgrimage to Vintage Story.
 
 ## What you get
 
-The Far Lands no longer hide millions of blocks away. They wrap your world as a 210 000-block ring around the map border. Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).
+The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border that auto-scales with your world size, covering roughly 30% of the surface (70% stays vanilla). On the default 1 024 000-block world the ring is 85 000 blocks deep from each border. Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).
 
-Walk inland from any border and you cross seven concentric bands. Each band is 30 000 blocks wide. Each band has a different glitch.
+Walk outward from the centre toward any border and you cross seven concentric bands. Each band is one-seventh of the ring depth (about 12 200 blocks on the default world). Each band has a different glitch, escalating as you approach the edge of the world.
 
 ### The Corner series (two borders nearby)
 
 | Band | Biome | Why it's broken |
 |------|-------|-----------------|
-| 0 | Nothingness | Pure void from bedrock to sky. Don't fall. |
-| 1 | Skygrid | Floating 4×4×8 grass cubes. The iconic one. |
-| 2 | EndIsland | Hovering white chalk discs in a black sky. |
-| 3 | Stripe | Half the world is missing in a tight 3D checkerboard. |
-| 4 | Strip | Thin 1-block grid panels reaching to Y=200. |
-| 5 | Corner (Stack) | Five horizontal slabs of terrain, separated by nothing. |
 | 6 | Farther | Stretched, taffy-like terrain bleeding back toward vanilla. |
+| 5 | Corner (Stack) | Five horizontal slabs of terrain, separated by nothing. |
+| 4 | Strip | Thin 1-block grid panels reaching to Y=200. |
+| 3 | Stripe | Half the world is missing in a tight 3D checkerboard. |
+| 2 | EndIsland | Hovering white chalk discs in a black sky. |
+| 1 | Skygrid | Floating 4×4×8 grass cubes. The iconic one. |
+| 0 | Nothingness | Pure void from bedrock to sky. Don't fall. |
 
 ### The Edge series (one border nearby)
 
 | Band | Biome | Why it's broken |
 |------|-------|-----------------|
-| 0 | 64-bit | Maximum-entropy noise. The world looks like static. |
-| 1 | NetherGrid | A spaced 8×8×4 basalt lattice. Walkable, just barely. |
-| 2 | Vertex | Chaotic granular salt-and-pepper. |
-| 3 | Comb | Stone teeth, one column out of four. |
-| 4 | Pole | Alternating 32-block walls and 32-block gaps. |
-| 5 | Edge (Loop) | The original Beta wall, pierced with horizontal tunnels. |
 | 6 | Tunnel | Vanilla terrain (caves, ores and all) lifted 40 blocks and repeated forever along the border axis. |
+| 5 | Edge (Loop) | The original Beta wall, pierced with horizontal tunnels. |
+| 4 | Pole | Alternating 32-block walls and 32-block gaps. |
+| 3 | Comb | Stone teeth, one column out of four. |
+| 2 | Vertex | Chaotic granular salt-and-pepper. |
+| 1 | NetherGrid | A spaced 8×8×4 basalt lattice. Walkable, just barely. |
+| 0 | 64-bit | Maximum-entropy noise. The world looks like static. |
 
 Edge patterns are axis-aware: tunnels and stripes always align with the closest border. The Tunnel biome feels like the world itself has glitched and started looping.
 
@@ -44,12 +44,12 @@ Edge patterns are axis-aware: tunnels and stripes always align with the closest 
 
 ## Where to find them
 
-The default Vintage Story world is 1 024 000 × 1 024 000 blocks. With the ring on by default, every Far Lands biome sits between coordinate 5 000 and 200 000 of any axis.
+The default Vintage Story world is 1 024 000 × 1 024 000 blocks. On that world every Far Lands biome sits between coordinate 0 and 85 000 of any axis. Three sample teleports:
 
 ```
-/tp <you> =40000  =220 =40000     -> Skygrid       (Corner band 1)
-/tp <you> =200000 =220 =512000    -> Tunnel        (Edge band 6)
-/tp <you> =5000   =220 =5000      -> Nothingness   (Corner band 0)
+/tp <you> =18000 =220 =18000      -> Skygrid       (Corner band 1)
+/tp <you> =78000 =220 =512000     -> Tunnel        (Edge band 6)
+/tp <you> =6000  =220 =6000       -> Nothingness   (Corner band 0)
 ```
 
 The center of the world stays vanilla. Players who never wander far see no glitched chunks, and pay zero worldgen cost for the mod.
@@ -66,15 +66,15 @@ Clients do not install the mod and never even download it. All 14 biomes use sto
 
 ## Configuration
 
-Three environment variables, set on the server before launch:
+The ring auto-scales with your world size. Three environment variables override the defaults if needed:
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `VSFL_DEPTH` | 210 000 | Total ring thickness from each border. |
-| `VSFL_BAND`  | 30 000  | Width of each of the 7 concentric bands. |
+| `VSFL_DEPTH` | `min(mapX, mapZ) / 12`, clamped to [60 000, 2 000 000] | Total ring thickness from each border. |
+| `VSFL_BAND`  | `VSFL_DEPTH / 7` | Width of each of the 7 concentric bands. |
 | `VSFL_TUNNEL_LIFT` | 40 | Blocks the Tunnel biome raises vanilla terrain by. |
 
-To pull the Far Lands tight against the border, drop `VSFL_DEPTH` to 70 000. For wider, milder bands, raise `VSFL_BAND` and lower `VSFL_DEPTH` to keep the 7:1 ratio.
+Set `VSFL_DEPTH` larger for a wider Far Lands crust, smaller for a tighter one. The 7-band ratio is preserved automatically when only `VSFL_DEPTH` is set.
 
 ---
 
@@ -99,3 +99,7 @@ Mods that add biomes or alter base terrain compose cleanly with this one. The Fa
 MIT-licensed, open source.
 
 Suggestions, bug reports, and screenshots of weird things you found at world's edge are all welcome.
+
+## AI Use disclosure
+
+The code for this mod has been 99% generated by Claude Opus 4.7 then reviewed by a software engineer (me). I'll be honest, the code could be better architectured, simplified, and faster; but I only made this mod for a quick fun afternoon session with friends so I don't care. I recommend forking this mod if you wanna improve on it.

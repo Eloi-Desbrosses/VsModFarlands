@@ -78,10 +78,7 @@ public class VsModFarlandsSystem : ModSystem
     public override void StartServerSide(ICoreServerAPI api)
     {
         _sapi = api;
-        _depth      = ReadIntEnv("VSFL_DEPTH", 210_000);
-        _bandWidth  = ReadIntEnv("VSFL_BAND", 30_000);
         _tunnelLift = ReadIntEnv("VSFL_TUNNEL_LIFT", 40);
-        _numBands   = Math.Max(1, _depth / _bandWidth);
 
         api.Event.ChunkColumnGeneration(OnChunkColumnGen, EnumWorldGenPass.Vegetation, "standard");
         api.Event.ServerRunPhase(EnumServerRunPhase.RunGame, OnReady);
@@ -93,6 +90,14 @@ public class VsModFarlandsSystem : ModSystem
         _mapSizeX = api.WorldManager.MapSizeX;
         _mapSizeZ = api.WorldManager.MapSizeZ;
 
+        // Auto-scale ring with world size: ~30% of total area is Far Lands.
+        // Floor 60k keeps bands wide enough to read on tiny worlds.
+        // Ceiling 2M keeps worldgen cost bounded on huge worlds.
+        int defaultDepth = Math.Clamp(Math.Min(_mapSizeX, _mapSizeZ) / 12, 60_000, 2_000_000);
+        _depth     = ReadIntEnv("VSFL_DEPTH", defaultDepth);
+        _bandWidth = ReadIntEnv("VSFL_BAND", Math.Max(1, _depth / 7));
+        _numBands  = Math.Max(1, _depth / _bandWidth);
+
         _air = 0;
         _stone  = Resolve("rock-granite", "rock-andesite");
         _basalt = Resolve("rock-basalt", "rock-andesite", "rock-granite");
@@ -101,7 +106,7 @@ public class VsModFarlandsSystem : ModSystem
         _water  = Resolve("water-still-7", "water-flowing-7");
 
         api.Logger.Notification(
-            "[FarLands] mapSize=({0},{1}) depth={2} band={3} numBands={4}",
+            "[FarLands] mapSize=({0},{1}) depth={2} band={3} numBands={4} (auto-scaled from world size)",
             _mapSizeX, _mapSizeZ, _depth, _bandWidth, _numBands);
         api.Logger.Notification(
             "[FarLands] ring on x in [0,{0}] u [{1},{2}], same on z",
