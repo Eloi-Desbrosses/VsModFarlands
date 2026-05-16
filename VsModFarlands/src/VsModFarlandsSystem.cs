@@ -115,13 +115,15 @@ public class VsModFarlandsSystem : ModSystem
     }
 
     /// <summary>
-    /// Reads the persisted coverage % from the world config. Coverage % is set
-    /// either via the Customize World UI (dropdown) or via the /farlands
-    /// coverage chat command. Defaults to 20 when the key is absent.
+    /// Reads the persisted coverage % from the savegame's worldconfig. Set
+    /// either by the Customize World UI (dropdown) at creation, or by
+    /// /farlands coverage at runtime. Defaults to 20 when the key is absent.
+    /// Reads SaveGame.WorldConfiguration (the canonical persisted tree) to
+    /// match the vanilla VS pattern in vsessentialsmod / vssurvivalmod.
     /// </summary>
     private int ReadCoveragePctFromConfig()
     {
-        string raw = _sapi!.World.Config.GetString("Far Lands Coverage", "20");
+        string raw = _sapi!.WorldManager.SaveGame.WorldConfiguration.GetString("Far Lands Coverage", "20");
         if (!int.TryParse(raw, out int pct)) pct = 20;
         return Math.Clamp(pct, 0, 100);
     }
@@ -180,7 +182,18 @@ public class VsModFarlandsSystem : ModSystem
         }
 
         int newPct = Math.Clamp((int)arg, 0, 100);
-        api.World.Config.SetString("Far Lands Coverage", newPct.ToString());
+        string newStr = newPct.ToString();
+
+        // VS uses two worldconfig trees: WorldManager.SaveGame.WorldConfiguration
+        // is the canonical persisted store that the savegame file serializes;
+        // World.Config is a runtime mirror that VS populates from SaveGame on
+        // world load but never syncs back on save. Writing only to World.Config
+        // produces a runtime-visible change that is silently dropped on the
+        // next world load. Write both: SaveGame for persistence, World.Config
+        // so any code path that reads the live mirror (including our own
+        // ReadCoveragePctFromConfig) sees the new value immediately.
+        api.WorldManager.SaveGame.WorldConfiguration.SetString("Far Lands Coverage", newStr);
+        api.World.Config.SetString("Far Lands Coverage", newStr);
         RecomputeRing(newPct, useEnvOverrides: false);
 
         api.Logger.Notification(
