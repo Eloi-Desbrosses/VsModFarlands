@@ -58,11 +58,14 @@ The center of the world stays vanilla. Players who never wander far see no glitc
 
 ---
 
-## Multiplayer / dedicated server
+## Install location
 
-**Server-side only.** Drop the zip into your server's `Mods/` folder. That's all.
+Worldgen runs server-authoritatively, but the install location depends on how you play.
 
-Clients do not install the mod and never even download it. All 14 biomes use stock Vintage Story blocks (rock, basalt, snowblock, grass), so connecting players see no missing-block warnings. The mod adds no commands, no permissions, no networking. It writes no custom data to the save, so you can add or remove it on an existing world: already-generated chunks stay as they were.
+- **Single player**: drop `VsModFarlands.dll` into your local `%APPDATA%/VintagestoryData/Mods/` (Windows) or `~/.config/VintagestoryData/Mods/` (Linux). In single player the embedded server runs in the same process as the client, so a single install handles both. The Customize-World dropdown only renders when the file is installed as a **raw DLL** at this path — VS does not scan folder/ZIP mods client-side at world creation.
+- **Dedicated server**: drop the released `.zip` into the server's `Mods/` folder. Clients can join **without** installing the mod locally — every generated block is a vanilla block, `requiredOnClient: false` is set in the mod metadata, and the mod adds no commands, no permissions, no networking. Coverage is picked by the admin in the Customize-World UI when the world is first created, or via the env-var overrides described below.
+
+The mod writes no custom data to the save, so you can add or remove it on an existing world: already-generated chunks stay as they were.
 
 ---
 
@@ -99,7 +102,7 @@ Chunks inside the ring add roughly 10 to 50 ms of worldgen per chunk on a modern
 
 ## Compatibility
 
-Built and tested against Vintage Story 1.22.2. Server side only. No conflicts expected: the mod writes blocks during chunk generation on a single pass (`Vegetation`), after vanilla terrain has been laid down. It does not subscribe to player events, tick handlers, or networking hooks.
+Built and tested against Vintage Story 1.22.2. Worldgen runs server-authoritatively (see install section above for where to put the file). No conflicts expected: the mod writes blocks during chunk generation on a single pass (`Vegetation`), after vanilla terrain has been laid down. It does not subscribe to player events, tick handlers, or networking hooks.
 
 Mods that add biomes or alter base terrain compose cleanly with this one. The Far Lands ring runs after them, so their content is what gets glitched.
 

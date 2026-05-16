@@ -88,9 +88,11 @@ for the mechanism.
 ## Compatibility
 
 - Vintage Story 1.22.2.
-- Server-side only for worldgen; raw-DLL install required at
-  `%APPDATA%/VintagestoryData/Mods/VsModFarlands.dll` for the slider to
-  appear in singleplayer Customize-World.
+- Worldgen runs server-authoritatively. **Single player**: install the
+  raw `VsModFarlands.dll` at `%APPDATA%/VintagestoryData/Mods/` so the
+  dropdown renders in Customize-World. **Dedicated server**: install
+  the released `.zip` in the server's `Mods/` folder; clients can join
+  without the mod (`requiredOnClient: false`, all blocks are vanilla).
 - Safe to add or remove on an existing world (newly generated chunks use
   the new ring, previously generated chunks stay vanilla).
 

@@ -1,8 +1,8 @@
 # Far Lands
 
-A server-side Vintage Story mod that injects 14 different glitched terrain
-biomes into a ring around the world border, faithfully recreating the iconic
-Minecraft Far Lands.
+A Vintage Story mod with server-authoritative worldgen that injects 14
+different glitched terrain biomes into a ring around the world border,
+faithfully recreating the iconic Minecraft Far Lands.
 
 ## What it does
 
@@ -34,12 +34,25 @@ the border axis — a literal "world raised and stuttering" effect.
 
 ## Installation
 
-1. Drop the released `.zip` into `%APPDATA%/VintagestoryData/Mods/` on Windows
-   (or `~/.config/VintagestoryData/Mods/` on Linux).
-2. Start any world. The mod is **server-side only** — clients do not need it.
+Worldgen runs server-authoritatively. Where to install depends on how you
+play:
 
-The first chunk inside the ring takes a fraction of a second longer to
-generate than vanilla; chunks past the ring are untouched.
+- **Single player**: drop `VsModFarlands.dll` into
+  `%APPDATA%/VintagestoryData/Mods/` on Windows (or
+  `~/.config/VintagestoryData/Mods/` on Linux). In single player the
+  embedded server runs in the same process as the client, so this one
+  location handles both. The Customize-World dropdown only appears when
+  the file is a **raw DLL at this path** — VS does not scan folder/ZIP
+  mods client-side at world creation.
+- **Dedicated server**: drop the released `.zip` into the server's
+  `Mods/` folder. Clients can join **without** installing the mod
+  locally — every generated block is a vanilla block, and
+  `requiredOnClient: false` is set in the mod metadata. Coverage is
+  picked by the admin in the Customize-World UI when the world is first
+  created, or via the env-var overrides documented below.
+
+Either way, the first chunk inside the ring takes a fraction of a second
+longer to generate than vanilla; chunks past the ring are untouched.
 
 ## Configuration
 
