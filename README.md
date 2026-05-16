@@ -95,24 +95,26 @@ Env vars take precedence over the world-config slider when present.
 ## Suggested coordinates
 
 Replace `<player>` with your in-game name. Coordinates below target the
-centre of each band on the default 1 024 000-block world.
+centre of each band on the default 1 024 000-block world **at the 20%
+default coverage** (ring depth ~54 000 blocks, band width ~7 700 blocks).
+If you change the coverage, the band centres shift outward proportionally.
 
 ```
-/tp <player> =6000  =220 =6000       # Nothingness   (Corner band 0)
-/tp <player> =18000 =220 =18000      # Skygrid       (Corner band 1, the iconic one)
-/tp <player> =30000 =220 =30000      # EndIsland     (Corner band 2)
-/tp <player> =42000 =220 =42000      # Stripe        (Corner band 3)
-/tp <player> =54000 =220 =54000      # Strip         (Corner band 4)
-/tp <player> =66000 =220 =66000      # Corner Stack  (Corner band 5)
-/tp <player> =78000 =220 =78000      # Farther       (Corner band 6)
+/tp <player> =3800  =220 =3800       # Nothingness   (Corner band 0)
+/tp <player> =11500 =220 =11500      # Skygrid       (Corner band 1, the iconic one)
+/tp <player> =19200 =220 =19200      # EndIsland     (Corner band 2)
+/tp <player> =26900 =220 =26900      # Stripe        (Corner band 3)
+/tp <player> =34600 =220 =34600      # Strip         (Corner band 4)
+/tp <player> =42300 =220 =42300      # Corner Stack  (Corner band 5)
+/tp <player> =50000 =220 =50000      # Farther       (Corner band 6)
 
-/tp <player> =6000  =220 =512000     # 64-bit        (Edge W band 0)
-/tp <player> =18000 =220 =512000     # NetherGrid    (Edge W band 1)
-/tp <player> =30000 =220 =512000     # Vertex        (Edge W band 2)
-/tp <player> =42000 =220 =512000     # Comb          (Edge W band 3)
-/tp <player> =54000 =220 =512000     # Pole          (Edge W band 4)
-/tp <player> =66000 =220 =512000     # Edge Loop     (Edge W band 5)
-/tp <player> =78000 =220 =512000     # Tunnel        (Edge W band 6)
+/tp <player> =3800  =220 =512000     # 64-bit        (Edge W band 0)
+/tp <player> =11500 =220 =512000     # NetherGrid    (Edge W band 1)
+/tp <player> =19200 =220 =512000     # Vertex        (Edge W band 2)
+/tp <player> =26900 =220 =512000     # Comb          (Edge W band 3)
+/tp <player> =34600 =220 =512000     # Pole          (Edge W band 4)
+/tp <player> =42300 =220 =512000     # Edge Loop     (Edge W band 5)
+/tp <player> =50000 =220 =512000     # Tunnel        (Edge W band 6)
 ```
 
 ## Building from source

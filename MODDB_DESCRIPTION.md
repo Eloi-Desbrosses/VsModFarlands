@@ -10,11 +10,11 @@ This mod brings that pilgrimage to Vintage Story.
 
 ## What you get
 
-The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border, sized by a single slider on the world-creation screen: **Far Lands coverage (%)**, from 0 (disabled) to 100 (entire world). The default 30% leaves vanilla as roughly 70% of the surface while still making the ring a serious border destination. Whatever you pick, the ring scales with your world size, so the same percentage feels proportionally similar on a 1M and a 65M world.
+The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border, sized by a single dropdown on the world-creation screen: **Far Lands Coverage**, with six steps from 0% (disabled) to 100% (entire world). The default 20% leaves vanilla as roughly 80% of the surface while still making the ring a serious border destination. Whatever you pick, the ring scales with your world size, so the same percentage feels proportionally similar on a 1M and a 65M world.
 
 Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).
 
-Walk outward from the centre toward any border and you cross seven concentric bands. Each band is one-seventh of the ring depth (about 12 200 blocks on the default world). Each band has a different glitch, escalating as you approach the edge of the world.
+Walk outward from the centre toward any border and you cross seven concentric bands, each one-seventh of the ring depth. Each band has a different glitch, escalating as you approach the edge of the world.
 
 ### The Corner series (two borders nearby)
 
@@ -46,15 +46,15 @@ Edge patterns are axis-aware: tunnels and stripes always align with the closest 
 
 ## Where to find them
 
-The default Vintage Story world is 1 024 000 × 1 024 000 blocks. On that world every Far Lands biome sits between coordinate 0 and 85 000 of any axis. Three sample teleports:
+On the default 1 024 000 × 1 024 000 world at the 20% default coverage, the ring is about 54 000 blocks deep from each border, with bands of roughly 7 700 blocks each. Every Far Lands biome sits between coordinate 0 and 54 000 of any axis on that world. Three sample teleports:
 
 ```
-/tp <you> =18000 =220 =18000      -> Skygrid       (Corner band 1)
-/tp <you> =78000 =220 =512000     -> Tunnel        (Edge band 6)
-/tp <you> =6000  =220 =6000       -> Nothingness   (Corner band 0)
+/tp <you> =11500 =220 =11500      -> Skygrid       (Corner band 1)
+/tp <you> =50000 =220 =512000     -> Tunnel        (Edge band 6)
+/tp <you> =3800  =220 =3800       -> Nothingness   (Corner band 0)
 ```
 
-The center of the world stays vanilla. Players who never wander far see no glitched chunks, and pay zero worldgen cost for the mod.
+The center of the world stays vanilla. Players who never wander far see no glitched chunks, and pay zero worldgen cost for the mod. If you set the coverage higher, the ring deepens proportionally and the band coordinates above shift outward.
 
 ---
 
@@ -68,15 +68,24 @@ Clients do not install the mod and never even download it. All 14 biomes use sto
 
 ## Configuration
 
-A single slider on the **Customize World** screen controls everything:
+A single dropdown on the **Customize World** screen controls everything:
 
-| Setting | Range | Default | Meaning |
-|---------|-------|---------|---------|
-| Far Lands coverage (%) | 0–100, step 5 | 30 | Fraction of map surface covered by Far Lands biomes. Scales with world size. |
+| Setting | Values | Default | Meaning |
+|---------|--------|---------|---------|
+| Far Lands Coverage | `0%`, `20%`, `40%`, `60%`, `80%`, `100%` | `20%` | Fraction of map surface covered by Far Lands biomes. Scales with world size. |
 
-Pick 0 to disable the mod for a specific world. Pick 100 if you want the entire map to be glitched. Most playthroughs land between 20 and 50.
+Pick `0%` to disable the mod for a specific world. Pick `100%` if you want the entire map to be glitched. Most playthroughs land at `20%` or `40%`.
 
-For dedicated servers or Docker deployments where the UI isn't practical, three environment variables override the slider: `VSFL_DEPTH` (ring thickness from each border in blocks), `VSFL_BAND` (band width, defaults to `VSFL_DEPTH / 7`), and `VSFL_TUNNEL_LIFT` (Tunnel raise height, default 40).
+For dedicated servers or Docker deployments where the UI isn't practical, three environment variables override the dropdown: `VSFL_DEPTH` (ring thickness from each border in blocks), `VSFL_BAND` (band width, defaults to `VSFL_DEPTH / 7`), and `VSFL_TUNNEL_LIFT` (Tunnel raise height, default 40).
+
+### Label rendering
+
+Vintage Story renders the dropdown's label and values through its translation system, looking up keys like `worldattribute-Far Lands Coverage`. For raw-DLL mods like this one, VS reads the assembly's mod metadata via reflection without fully loading the assembly client-side before the Customize-World screen renders, so the runtime translation injection we ship can't fire in time. You'll see:
+
+- Label as `worldattribute-Far Lands Coverage`
+- Values as `worldconfig-Far Lands Coverage-0%`, `…-20%`, etc.
+
+The text after the prefix is readable as the actual setting. If you want the prefixes gone, drop our 13 translation entries into `<Vintagestory>/assets/game/lang/en.json` (additive, gets wiped on VS update).
 
 ---
 
