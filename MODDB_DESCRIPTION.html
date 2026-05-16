@@ -1,0 +1,118 @@
+<p><em>Fourteen flavours of broken terrain, waiting just past the edge of the map.</em></p>
+
+<p>In 2010, a 32-bit floating-point bug in Minecraft Beta produced the Far Lands: a strip of corrupted, impossible terrain starting exactly 12 550 821 blocks from spawn. Walls of stone. Floating grid cities. Hollow tunnels stacked to the sky. For a generation of players, <em>Far Lands or Bust</em> was a pilgrimage.</p>
+
+<p>This mod brings that pilgrimage to Vintage Story.</p>
+
+<hr>
+
+<h2>What you get</h2>
+
+<p>The Far Lands no longer hide millions of blocks away. They wrap your world as a ring around the map border that auto-scales with your world size, covering roughly 30% of the surface (70% stays vanilla). On the default 1 024 000-block world the ring is 85 000 blocks deep from each border. Within that ring, every chunk is rewritten by one of 14 distinct terrain generators, each modelled on a real Minecraft Far Lands variant (Beta Java, modern Bedrock, and a handful of classic engine-mod oddities).</p>
+
+<p>Walk outward from the centre toward any border and you cross seven concentric bands. Each band is one-seventh of the ring depth (about 12 200 blocks on the default world). Each band has a different glitch, escalating as you approach the edge of the world.</p>
+
+<h3>The Corner series (two borders nearby)</h3>
+
+<table>
+  <thead>
+    <tr><th>Band</th><th>Biome</th><th>Why it's broken</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>6</td><td>Farther</td><td>Stretched, taffy-like terrain bleeding back toward vanilla.</td></tr>
+    <tr><td>5</td><td>Corner (Stack)</td><td>Five horizontal slabs of terrain, separated by nothing.</td></tr>
+    <tr><td>4</td><td>Strip</td><td>Thin 1-block grid panels reaching to Y=200.</td></tr>
+    <tr><td>3</td><td>Stripe</td><td>Half the world is missing in a tight 3D checkerboard.</td></tr>
+    <tr><td>2</td><td>EndIsland</td><td>Hovering white chalk discs in a black sky.</td></tr>
+    <tr><td>1</td><td>Skygrid</td><td>Floating 4×4×8 grass cubes. The iconic one.</td></tr>
+    <tr><td>0</td><td>Nothingness</td><td>Pure void from bedrock to sky. Don't fall.</td></tr>
+  </tbody>
+</table>
+
+<h3>The Edge series (one border nearby)</h3>
+
+<table>
+  <thead>
+    <tr><th>Band</th><th>Biome</th><th>Why it's broken</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>6</td><td>Tunnel</td><td>Vanilla terrain (caves, ores and all) lifted 40 blocks and repeated forever along the border axis.</td></tr>
+    <tr><td>5</td><td>Edge (Loop)</td><td>The original Beta wall, pierced with horizontal tunnels.</td></tr>
+    <tr><td>4</td><td>Pole</td><td>Alternating 32-block walls and 32-block gaps.</td></tr>
+    <tr><td>3</td><td>Comb</td><td>Stone teeth, one column out of four.</td></tr>
+    <tr><td>2</td><td>Vertex</td><td>Chaotic granular salt-and-pepper.</td></tr>
+    <tr><td>1</td><td>NetherGrid</td><td>A spaced 8×8×4 basalt lattice. Walkable, just barely.</td></tr>
+    <tr><td>0</td><td>64-bit</td><td>Maximum-entropy noise. The world looks like static.</td></tr>
+  </tbody>
+</table>
+
+<p>Edge patterns are axis-aware: tunnels and stripes always align with the closest border. The Tunnel biome feels like the world itself has glitched and started looping.</p>
+
+<hr>
+
+<h2>Where to find them</h2>
+
+<p>The default Vintage Story world is 1 024 000 × 1 024 000 blocks. On that world every Far Lands biome sits between coordinate 0 and 85 000 of any axis. Three sample teleports:</p>
+
+<pre><code>/tp &lt;you&gt; =18000 =220 =18000      -&gt; Skygrid       (Corner band 1)
+/tp &lt;you&gt; =78000 =220 =512000     -&gt; Tunnel        (Edge band 6)
+/tp &lt;you&gt; =6000  =220 =6000       -&gt; Nothingness   (Corner band 0)</code></pre>
+
+<p>The center of the world stays vanilla. Players who never wander far see no glitched chunks, and pay zero worldgen cost for the mod.</p>
+
+<hr>
+
+<h2>Multiplayer / dedicated server</h2>
+
+<p><strong>Server-side only.</strong> Drop the zip into your server's <code>Mods/</code> folder. That's all.</p>
+
+<p>Clients do not install the mod and never even download it. All 14 biomes use stock Vintage Story blocks (rock, basalt, snowblock, grass), so connecting players see no missing-block warnings. The mod adds no commands, no permissions, no networking. It writes no custom data to the save, so you can add or remove it on an existing world: already-generated chunks stay as they were.</p>
+
+<hr>
+
+<h2>Configuration</h2>
+
+<p>The ring auto-scales with your world size. Three environment variables override the defaults if needed:</p>
+
+<table>
+  <thead>
+    <tr><th>Variable</th><th>Default</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>VSFL_DEPTH</code></td><td><code>min(mapX, mapZ) / 12</code>, clamped to [60 000, 2 000 000]</td><td>Total ring thickness from each border.</td></tr>
+    <tr><td><code>VSFL_BAND</code></td><td><code>VSFL_DEPTH / 7</code></td><td>Width of each of the 7 concentric bands.</td></tr>
+    <tr><td><code>VSFL_TUNNEL_LIFT</code></td><td>40</td><td>Blocks the Tunnel biome raises vanilla terrain by.</td></tr>
+  </tbody>
+</table>
+
+<p>Set <code>VSFL_DEPTH</code> larger for a wider Far Lands crust, smaller for a tighter one. The 7-band ratio is preserved automatically when only <code>VSFL_DEPTH</code> is set.</p>
+
+<hr>
+
+<h2>Performance</h2>
+
+<p>Chunks outside the ring are untouched and cost nothing.</p>
+
+<p>Chunks inside the ring add roughly 10 to 50 ms of worldgen per chunk on a modern CPU, depending on the biome. That cost is paid once, at chunk generation, and never again: the masks bake straight into the saved chunk data. Worldgen runs on background worker threads, so it never blocks the main game loop.</p>
+
+<hr>
+
+<h2>Compatibility</h2>
+
+<p>Built and tested against Vintage Story 1.22.2. Server side only. No conflicts expected: the mod writes blocks during chunk generation on a single pass (<code>Vegetation</code>), after vanilla terrain has been laid down. It does not subscribe to player events, tick handlers, or networking hooks.</p>
+
+<p>Mods that add biomes or alter base terrain compose cleanly with this one. The Far Lands ring runs after them, so their content is what gets glitched.</p>
+
+<hr>
+
+<h2>Source &amp; license</h2>
+
+<p>MIT-licensed, open source. Repo: <a href="https://github.com/Eloi-Desbrosses/VsModFarlands">github.com/Eloi-Desbrosses/VsModFarlands</a></p>
+
+<p>Suggestions, bug reports, and screenshots of weird things you found at world's edge are all welcome.</p>
+
+<hr>
+
+<h2>AI Use disclosure</h2>
+
+<p>The code for this mod has been 99% generated by Claude Opus 4.7 then reviewed by a software engineer (me). I'll be honest, the code could be better architectured, simplified, and faster; but I only made this mod for a quick fun afternoon session with friends so I don't care. I recommend forking this mod if you wanna improve on it.</p>
