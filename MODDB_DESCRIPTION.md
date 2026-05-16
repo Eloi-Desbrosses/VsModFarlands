@@ -86,9 +86,8 @@ For dedicated servers or Docker deployments where the UI isn't practical, three 
 If you installed the mod via a 1-click installer that ships it as a ZIP, the Customize-World dropdown won't render in single player because VS doesn't scan ZIP/folder mods client-side at world creation. A chat command exists for that case (and for any later change at runtime):
 
 ```
-/farlands coverage              -> show current value
 /farlands coverage <0-100>      -> set coverage, persist to world config
-/farlands status                -> full ring parameters (depth, band width, …)
+/farlands status                -> show current coverage and full ring parameters
 ```
 
 Requires the `controlserver` privilege. The new value persists in the world config so it survives restarts. Newly generated chunks use the new ring; already-generated chunks stay as they were.

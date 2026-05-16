@@ -86,9 +86,8 @@ client-side), an admin chat command exists to set or read coverage at
 runtime:
 
 ```
-/farlands coverage              # show the current value
 /farlands coverage <0-100>      # set coverage and persist to world config
-/farlands status                # show full ring parameters
+/farlands status                # show current coverage and full ring parameters
 ```
 
 Requires the `controlserver` privilege. The new value persists in the

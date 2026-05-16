@@ -113,8 +113,8 @@ for the mechanism.
 
 ## Asset
 
-`vsmodfarlands_0.2.0.zip` — 329 584 bytes (modinfo + DLL + modicon + LICENSE)
-SHA-256: `79785d072aa8171844cfe1a8cd6f4737b835531da7ac0ee2ebb4c6252a62b804`
+`vsmodfarlands_0.2.0.zip` — 329 508 bytes (modinfo + DLL + modicon + LICENSE)
+SHA-256: `14ef3b28d2fa889f041606c3b6019de906693988725946ebefb794922561a74c`
 
 ## License
 

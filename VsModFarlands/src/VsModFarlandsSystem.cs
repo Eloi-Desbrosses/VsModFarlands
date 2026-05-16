@@ -157,8 +157,8 @@ public class VsModFarlandsSystem : ModSystem
             .WithDescription("Far Lands ring controls")
             .RequiresPrivilege(Privilege.controlserver)
             .BeginSubCommand("coverage")
-                .WithDescription("Show or set the Far Lands coverage percentage (0-100). Persists in the world config; future chunks use the new value, already-generated chunks stay as they were.")
-                .WithArgs(parsers.OptionalIntRange("percent", 0, 100))
+                .WithDescription("Set the Far Lands coverage percentage (0-100). Persists in the world config; future chunks use the new value, already-generated chunks stay as they were. Use /farlands status to read the current value.")
+                .WithArgs(parsers.IntRange("percent", 0, 100))
                 .HandleWith(OnCmdCoverage)
             .EndSubCommand()
             .BeginSubCommand("status")
@@ -170,18 +170,11 @@ public class VsModFarlandsSystem : ModSystem
     private TextCommandResult OnCmdCoverage(TextCommandCallingArgs args)
     {
         var api = _sapi!;
-        var arg = args.Parsers[0].GetValue();
-
-        if (arg == null)
-        {
-            // No argument → report current value.
-            int current = ReadCoveragePctFromConfig();
-            return TextCommandResult.Success(
-                $"Far Lands coverage is {current}%. Depth {_depth} blocks, band width {_bandWidth} blocks. " +
-                $"Use /farlands coverage <0-100> to change it.");
-        }
-
-        int newPct = Math.Clamp((int)arg, 0, 100);
+        // Arg is mandatory (IntRange, not OptionalIntRange) — OptionalIntRange
+        // would silently default to 0 when the user typed "/farlands coverage"
+        // with no number, which we used to misinterpret as "show" and instead
+        // overwrote the saved value with 0. Use /farlands status to read.
+        int newPct = Math.Clamp((int)args.Parsers[0].GetValue(), 0, 100);
         string newStr = newPct.ToString();
 
         // VS uses two worldconfig trees: WorldManager.SaveGame.WorldConfiguration
