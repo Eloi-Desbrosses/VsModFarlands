@@ -34,38 +34,32 @@ the border axis — a literal "world raised and stuttering" effect.
 
 ## Installation
 
-Worldgen runs server-authoritatively. Where to install depends on how you
-play:
+Server-side only. Drop the released `.zip` into your `Mods/` folder:
 
-- **Single player**: drop `VsModFarlands.dll` into
-  `%APPDATA%/VintagestoryData/Mods/` on Windows (or
-  `~/.config/VintagestoryData/Mods/` on Linux). In single player the
-  embedded server runs in the same process as the client, so this one
-  location handles both. The Customize-World dropdown only appears when
-  the file is a **raw DLL at this path** — VS does not scan folder/ZIP
-  mods client-side at world creation.
-- **Dedicated server**: drop the released `.zip` into the server's
-  `Mods/` folder. Clients can join **without** installing the mod
-  locally — every generated block is a vanilla block, and
-  `requiredOnClient: false` is set in the mod metadata. Coverage is
-  picked by the admin in the Customize-World UI when the world is first
-  created, or via the env-var overrides documented below.
+- **Single player**: `%APPDATA%/VintagestoryData/Mods/` on Windows,
+  `~/.config/VintagestoryData/Mods/` on Linux.
+- **Dedicated server**: the server's `Mods/` folder.
 
-Either way, the first chunk inside the ring takes a fraction of a second
-longer to generate than vanilla; chunks past the ring are untouched.
+Clients can join a dedicated server **without** installing the mod —
+every generated block is a vanilla block, and `requiredOnClient: false`
+is set in the mod metadata.
+
+The first chunk inside the ring takes a fraction of a second longer to
+generate than vanilla; chunks past the ring are untouched.
 
 ## Configuration
 
-When you create a new world, the **Customize** screen has a single dropdown
-in the **Worldgen** category:
+Coverage is set with an in-game chat command after you've joined the
+world. Default is `20%` until you change it.
 
-> **Far Lands Coverage** — `0%`, `20%`, `40%`, `60%`, `80%`, `100%`. Default `20%`.
+```
+/farlands coverage <0-100>      # set coverage and persist to world config
+/farlands status                # show current coverage and full ring parameters
+```
 
-This is the fraction of your map's surface that the Far Lands ring will cover.
-The ring is anchored at each world border and scales with your world size, so
-the same percentage on a 1 024 000-block world and a 65 000 000-block world
-both feel proportionally similar — a border crust occupying the same fraction
-of the playable surface.
+Requires the `controlserver` privilege (admin / single-player host). The
+value persists in the savegame, so it survives restarts. Newly generated
+chunks use the new ring; already-generated chunks stay as they were.
 
 | Coverage | What you get |
 |----------|--------------|
@@ -75,49 +69,18 @@ of the playable surface.
 | 60–80%   | Vanilla becomes the minority biome. |
 | 100%     | Every chunk of the world is a Far Lands biome. No vanilla center exists. |
 
-On the default 1 024 000-block world at 20% coverage, the ring is about
-54 000 blocks deep from each border, with bands of about 7 700 blocks each.
-
-### In-game chat command
-
-Whether or not the dropdown is reachable in your install (1-click ZIP
-installers, for example, drop a ZIP that doesn't render the dropdown
-client-side), an admin chat command exists to set or read coverage at
-runtime:
-
-```
-/farlands coverage <0-100>      # set coverage and persist to world config
-/farlands status                # show current coverage and full ring parameters
-```
-
-Requires the `controlserver` privilege. The new value persists in the
-world config so it survives restarts. Newly generated chunks use the new
-ring; already-generated chunks stay as they were.
-
-The chat command path **does not honour** `VSFL_DEPTH` / `VSFL_BAND` env
-vars (it always computes depth from the chosen %). The startup path
-*does* honour them, so headless deployments that pin these env vars
-still get their pinned values on every restart unless the operator runs
-the command after boot.
-
-### Translation-key limitation
-
-VS reads `[assembly: ModInfo]` from raw-DLL mods via metadata-only reflection,
-which means our assembly is never fully JIT-loaded on the client before the
-Customize-World screen renders. As a result, the dropdown label and values
-display with their VS-imposed prefixes:
-
-- Label shows as `worldattribute-Far Lands Coverage`
-- Values show as `worldconfig-Far Lands Coverage-0%`, `…-20%`, etc.
-
-The text after the prefix is readable as the actual setting and value. If you
-want clean labels, add the matching entries to your local
-`<Vintagestory>/assets/game/lang/en.json` (additive, gets wiped on VS update).
+The ring scales with your world size, so the same percentage on a
+1 024 000-block world and a 65 000 000-block world both feel
+proportionally similar — a border crust occupying the same fraction of
+the playable surface. On the default 1 024 000-block world at 20%
+coverage, the ring is about 54 000 blocks deep from each border, with
+bands of about 7 700 blocks each.
 
 ### Advanced overrides (servers, Docker)
 
-For headless / dedicated deployments where the customize-world UI isn't
-practical, three environment variables override the slider:
+For headless / dedicated deployments where running a chat command on
+every boot is impractical, three environment variables override the
+chat-command value at startup:
 
 | Variable           | Default                          | Meaning                                        |
 |--------------------|----------------------------------|------------------------------------------------|
@@ -125,7 +88,10 @@ practical, three environment variables override the slider:
 | `VSFL_BAND`        | `VSFL_DEPTH / 7`                 | Width of each of the 7 concentric bands.       |
 | `VSFL_TUNNEL_LIFT` | 40                               | How many blocks Tunnel raises vanilla terrain. |
 
-Env vars take precedence over the world-config slider when present.
+Env vars take precedence over the persisted coverage value at every
+server start. The chat command itself ignores env vars, so a runtime
+`/farlands coverage` call always takes effect immediately; on the next
+restart the env vars will reapply.
 
 ## Suggested coordinates
 

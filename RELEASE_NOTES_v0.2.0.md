@@ -1,12 +1,13 @@
-# v0.2.0 — Customize-World dropdown + auto-scaling ring
+# v0.2.0 — Chat-command coverage + auto-scaling ring
 
-First UI-configurable release since v0.1.0. The ring depth is now picked from
-a dropdown on the **Customize World** screen and auto-scales with world size,
-so solo players no longer need to touch environment variables. Env-var
-overrides remain available for headless deployments.
+First configurable release since v0.1.0. The ring depth auto-scales with
+world size, and coverage is set with a single in-game admin chat command
+(`/farlands coverage <0-100>`). Default `20%` until you change it. No
+Customize-World dropdown, no client-side install, no translation-key
+quirks — pure server-side, ZIP installs work everywhere including
+1-click installers.
 
-This release supersedes the unreleased v0.1.1 and v0.1.2 drafts and bundles
-their changes together with this session's UI/UX polish.
+This release supersedes the unreleased v0.1.1 and v0.1.2 drafts.
 
 ## What changed since v0.1.0
 
@@ -21,48 +22,32 @@ their changes together with this session's UI/UX polish.
   the canonical 14-biome layout is preserved at any ring size without manual
   tuning.
 
-### Customize-World dropdown (formerly draft v0.1.2)
-
-- **New world-config attribute** `Far Lands Coverage` under the **Worldgen**
-  category. Dropdown values: `0%`, `20%`, `40%`, `60%`, `80%`, `100%`.
-- **Default**: `20%` (a strong border phenomenon while keeping ~80% of the
-  playable surface vanilla).
-- **`onlyDuringWorldCreate: true`**: locked once the world is created, so
-  chunks generated at different times never disagree about ring depth.
-- **Env vars still win** when set (`VSFL_DEPTH`, `VSFL_BAND`,
-  `VSFL_TUNNEL_LIFT`).
-
 ### In-game chat command (this session)
 
-- **New `/farlands coverage` chat command** lets a server admin set or
-  read the coverage percentage at runtime. Persists in the world config,
-  so it survives restarts. Useful for installs where the Customize-World
-  dropdown can't be reached (1-click ZIP installers don't render
-  client-side; dedicated-server admins who didn't pick a value at world
-  creation; anyone who wants to flip coverage on an existing world).
-  Requires the `controlserver` privilege.
-- **New `/farlands status`** prints the full ring parameters (coverage,
-  map size, depth, band width, band count, tunnel lift).
-- Chat-command path computes depth from the chosen % only — env vars
-  (`VSFL_DEPTH` / `VSFL_BAND`) are intentionally ignored so the command
-  always takes effect at runtime. Startup path still honours env vars.
+- **New `/farlands coverage <0-100>` chat command** sets the coverage
+  percentage and persists it to the savegame. Newly generated chunks use
+  the new ring; already-generated chunks stay as they were. Requires the
+  `controlserver` privilege (admin / single-player host).
+- **New `/farlands status`** prints the full ring parameters (current
+  coverage, map size, ring depth, band width, band count, tunnel lift).
+- **Default coverage** is `20%` until the command sets a value.
+- **Persistence** writes to both `WorldManager.SaveGame.WorldConfiguration`
+  (canonical, persisted to disk) and `World.Config` (runtime mirror), so
+  the change is both immediately visible and survives restart.
 
-### UI/UX polish (this session)
+### Customize-World dropdown removed (this session)
 
-- **Dropdown trimmed from 11 to 6 values** (0%, 20%, 40%, 60%, 80%, 100%)
-  to reduce vertical clipping in the Customize-World dialog. Vanilla VS
-  doesn't scroll that dialog, and the Worldgen category already has ~18
-  vanilla entries; halving our option count keeps the screen usable on
-  smaller resolutions.
-- **Worldconfig key chosen for legibility** — `code: "Far Lands Coverage"`
-  with spaces, and dropdown names `"0%"…"100%"`, so the raw-key fallback
-  reads as natural English (see "Translation-key limitation" below).
-- **Best-effort translation injection** via `[ModuleInitializer]` and a
-  Harmony postfix on `TranslationService.GetUnformatted`. Works on the
-  server side (and on the client *after* entering any world). Does **not**
-  fire on the client before the Customize-World screen renders, because VS
-  reads `[assembly: ModInfo]` via metadata-only reflection without JIT-
-  loading raw-DLL mod assemblies at that point.
+- Earlier drafts shipped a `[assembly: ModInfo(WorldConfig = …)]`
+  dropdown on the Customize-World screen. It worked in single player only
+  if the file was installed as a raw DLL at `%APPDATA%/Mods/`, and even
+  then VS rendered raw translation keys (`worldattribute-Far Lands Coverage`
+  …) because VS reads raw-DLL `[ModInfo]` via metadata-only reflection
+  and never JIT-loads the assembly before the screen renders.
+- ZIP installs from 1-click installers (the ModDB path) couldn't reach
+  the dropdown at all.
+- Dropping the dropdown removes both classes of problem and gives a
+  single, consistent config path. The chat command works regardless of
+  install format (ZIP, folder, raw DLL).
 
 ## What the percentages mean
 
@@ -75,46 +60,36 @@ their changes together with this session's UI/UX polish.
 | 80%        | 273 000                  | 20%          | 80%            |
 | 100%       | 512 000                  | 0%           | 100%           |
 
-## Translation-key limitation
-
-Dropdown label and values render with their VS-hardcoded prefixes when no
-translation entry exists in the `game` domain:
-
-- Label: `worldattribute-Far Lands Coverage`
-- Values: `worldconfig-Far Lands Coverage-0%`, `…-20%`, etc.
-
-The text after the prefix is readable. For a clean label, add the matching
-entries to `<Vintagestory install>/assets/game/lang/en.json` (additive, gets
-wiped on VS update). This is a VS limitation for raw-DLL mods — see README
-for the mechanism.
-
 ## Upgrade notes
 
 - **Existing v0.1.0 worlds**: keep their already-generated chunks. New
-  chunks use the new auto-scaled ring depth derived from the slider (or env
-  vars). A world started on v0.1.0 will have two overlapping layouts at the
-  border of the previously explored area unless you regenerate.
-- **Custom `VSFL_DEPTH` users**: your env var still wins over the slider.
-- **World-config key renamed**: previously-drafted v0.1.1 / v0.1.2 used the
-  key `farLandsCoverage`. v0.2.0 uses `Far Lands Coverage` (with spaces).
-  This only matters if you hand-edited a `worldconfig` file from a draft
-  build — released v0.1.0 didn't have any world-config key.
+  chunks use the auto-scaled ring depth derived from the persisted
+  coverage value (or env vars). A world started on v0.1.0 will have two
+  overlapping layouts at the border of the previously explored area
+  unless you regenerate.
+- **Custom `VSFL_DEPTH` users**: your env var still wins at startup over
+  the persisted coverage value. The chat command itself ignores env vars,
+  so a runtime `/farlands coverage` call takes effect immediately; on the
+  next restart the env vars reapply.
+- **No more `worldconfig` slot**: if you hand-edited a `worldconfig` file
+  from a draft build, the key `Far Lands Coverage` is still respected
+  (the mod still reads it from the savegame at startup), but the
+  Customize-World UI no longer surfaces it. Use the chat command.
 
 ## Compatibility
 
 - Vintage Story 1.22.2.
-- Worldgen runs server-authoritatively. **Single player**: install the
-  raw `VsModFarlands.dll` at `%APPDATA%/VintagestoryData/Mods/` so the
-  dropdown renders in Customize-World. **Dedicated server**: install
-  the released `.zip` in the server's `Mods/` folder; clients can join
+- **Server-side only.** Single-player install:
+  `%APPDATA%/VintagestoryData/Mods/<zip>`. Dedicated server install:
+  the server's `Mods/<zip>`. Clients can join a dedicated server
   without the mod (`requiredOnClient: false`, all blocks are vanilla).
-- Safe to add or remove on an existing world (newly generated chunks use
-  the new ring, previously generated chunks stay vanilla).
+- Safe to add or remove on an existing world (newly generated chunks
+  use the new ring, previously generated chunks stay vanilla).
 
 ## Asset
 
-`vsmodfarlands_0.2.0.zip` — 329 508 bytes (modinfo + DLL + modicon + LICENSE)
-SHA-256: `14ef3b28d2fa889f041606c3b6019de906693988725946ebefb794922561a74c`
+`vsmodfarlands_0.2.0.zip` — 327 591 bytes (modinfo + DLL + modicon + LICENSE)
+SHA-256: `de4e54d42f63b7b2f124b5d041d54500beae4fc605b320f1fb64d6ac9536a402`
 
 ## License
 
