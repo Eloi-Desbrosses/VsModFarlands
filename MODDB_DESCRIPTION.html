@@ -94,6 +94,16 @@
 
 <p>For dedicated servers or Docker deployments where the UI isn't practical, three environment variables override the dropdown: <code>VSFL_DEPTH</code> (ring thickness from each border in blocks), <code>VSFL_BAND</code> (band width, defaults to <code>VSFL_DEPTH / 7</code>), and <code>VSFL_TUNNEL_LIFT</code> (Tunnel raise height, default 40).</p>
 
+<h3>In-game chat command</h3>
+
+<p>If you installed the mod via a 1-click installer that ships it as a ZIP, the Customize-World dropdown won't render in single player because VS doesn't scan ZIP/folder mods client-side at world creation. A chat command exists for that case (and for any later change at runtime):</p>
+
+<pre><code>/farlands coverage              -&gt; show current value
+/farlands coverage &lt;0-100&gt;      -&gt; set coverage, persist to world config
+/farlands status                -&gt; full ring parameters (depth, band width, …)</code></pre>
+
+<p>Requires the <code>controlserver</code> privilege. The new value persists in the world config so it survives restarts. Newly generated chunks use the new ring; already-generated chunks stay as they were.</p>
+
 <h3>Label rendering</h3>
 
 <p>Vintage Story renders the dropdown's label and values through its translation system, looking up keys like <code>worldattribute-Far Lands Coverage</code>. For raw-DLL mods like this one, VS reads the assembly's mod metadata via reflection without fully loading the assembly client-side before the Customize-World screen renders, so the runtime translation injection we ship can't fire in time. You'll see:</p>

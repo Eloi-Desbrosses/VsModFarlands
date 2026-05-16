@@ -32,6 +32,21 @@ their changes together with this session's UI/UX polish.
 - **Env vars still win** when set (`VSFL_DEPTH`, `VSFL_BAND`,
   `VSFL_TUNNEL_LIFT`).
 
+### In-game chat command (this session)
+
+- **New `/farlands coverage` chat command** lets a server admin set or
+  read the coverage percentage at runtime. Persists in the world config,
+  so it survives restarts. Useful for installs where the Customize-World
+  dropdown can't be reached (1-click ZIP installers don't render
+  client-side; dedicated-server admins who didn't pick a value at world
+  creation; anyone who wants to flip coverage on an existing world).
+  Requires the `controlserver` privilege.
+- **New `/farlands status`** prints the full ring parameters (coverage,
+  map size, depth, band width, band count, tunnel lift).
+- Chat-command path computes depth from the chosen % only — env vars
+  (`VSFL_DEPTH` / `VSFL_BAND`) are intentionally ignored so the command
+  always takes effect at runtime. Startup path still honours env vars.
+
 ### UI/UX polish (this session)
 
 - **Dropdown trimmed from 11 to 6 values** (0%, 20%, 40%, 60%, 80%, 100%)
@@ -98,8 +113,8 @@ for the mechanism.
 
 ## Asset
 
-`vsmodfarlands_0.2.0.zip` — 328 172 bytes (modinfo + DLL + modicon + LICENSE)
-SHA-256: `46b5b4038d239a40d2de78282c86a78263ec73ea400dc145178c2c1db26e83ce`
+`vsmodfarlands_0.2.0.zip` — 329 537 bytes (modinfo + DLL + modicon + LICENSE)
+SHA-256: `20e588b8f47800c10fca530a0d9bce874b09de9a6e521ed60bd00e6e09e30849`
 
 ## License
 

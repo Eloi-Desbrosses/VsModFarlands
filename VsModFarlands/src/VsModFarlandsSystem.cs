@@ -82,6 +82,8 @@ public class VsModFarlandsSystem : ModSystem
 
         api.Event.ChunkColumnGeneration(OnChunkColumnGen, EnumWorldGenPass.Vegetation, "standard");
         api.Event.ServerRunPhase(EnumServerRunPhase.RunGame, OnReady);
+
+        RegisterCommands(api);
     }
 
     private void OnReady()
@@ -90,20 +92,8 @@ public class VsModFarlandsSystem : ModSystem
         _mapSizeX = api.WorldManager.MapSizeX;
         _mapSizeZ = api.WorldManager.MapSizeZ;
 
-        // Coverage % is set per-world via the Customize World UI (dropdown, default 30).
-        // Math: vanilla side = world × sqrt(1 - C), so depth = world × (1 - sqrt(1 - C)) / 2.
-        // Env var VSFL_DEPTH overrides everything (Docker/server deployments).
-        // Dropdown values are stored as strings, so parse rather than GetInt.
-        string coverageStr = api.World.Config.GetString("Far Lands Coverage", "20");
-        if (!int.TryParse(coverageStr, out int coveragePct)) coveragePct = 20;
-        coveragePct = Math.Clamp(coveragePct, 0, 100);
-        double coverage = coveragePct / 100.0;
-        int worldMin = Math.Min(_mapSizeX, _mapSizeZ);
-        int derivedDepth = (int)(worldMin * (1.0 - Math.Sqrt(1.0 - coverage)) / 2.0);
-
-        _depth     = ReadIntEnv("VSFL_DEPTH", derivedDepth);
-        _bandWidth = ReadIntEnv("VSFL_BAND",  Math.Max(1, _depth / 7));
-        _numBands  = Math.Max(1, _depth / Math.Max(1, _bandWidth));
+        int coveragePct = ReadCoveragePctFromConfig();
+        RecomputeRing(coveragePct, useEnvOverrides: true);
 
         _air = 0;
         _stone  = Resolve("rock-granite", "rock-andesite");
@@ -122,6 +112,92 @@ public class VsModFarlandsSystem : ModSystem
             "[FarLands] block ids: air={0} stone={1} basalt={2} chalk={3} grass={4} water={5}",
             _air, _stone, _basalt, _chalk, _grass, _water);
         _ready = true;
+    }
+
+    /// <summary>
+    /// Reads the persisted coverage % from the world config. Coverage % is set
+    /// either via the Customize World UI (dropdown) or via the /farlands
+    /// coverage chat command. Defaults to 20 when the key is absent.
+    /// </summary>
+    private int ReadCoveragePctFromConfig()
+    {
+        string raw = _sapi!.World.Config.GetString("Far Lands Coverage", "20");
+        if (!int.TryParse(raw, out int pct)) pct = 20;
+        return Math.Clamp(pct, 0, 100);
+    }
+
+    /// <summary>
+    /// Re-derives ring depth, band width and band count from a coverage %.
+    /// Math: vanilla side = world × sqrt(1 - C), so depth = world × (1 − √(1 − C)) / 2.
+    /// When useEnvOverrides is true, VSFL_DEPTH / VSFL_BAND env vars win (startup
+    /// path; useful for Docker/headless deployments). When false (chat command
+    /// path), env vars are ignored so /farlands coverage always takes effect at
+    /// runtime even on a server that set env vars.
+    /// </summary>
+    private void RecomputeRing(int coveragePct, bool useEnvOverrides)
+    {
+        double coverage = coveragePct / 100.0;
+        int worldMin = Math.Min(_mapSizeX, _mapSizeZ);
+        int derivedDepth = (int)(worldMin * (1.0 - Math.Sqrt(1.0 - coverage)) / 2.0);
+
+        _depth     = useEnvOverrides ? ReadIntEnv("VSFL_DEPTH", derivedDepth) : derivedDepth;
+        _bandWidth = useEnvOverrides ? ReadIntEnv("VSFL_BAND",  Math.Max(1, _depth / 7)) : Math.Max(1, _depth / 7);
+        _numBands  = Math.Max(1, _depth / Math.Max(1, _bandWidth));
+    }
+
+    // ====================== chat commands ======================
+
+    private void RegisterCommands(ICoreServerAPI api)
+    {
+        var parsers = api.ChatCommands.Parsers;
+
+        api.ChatCommands.Create("farlands")
+            .WithDescription("Far Lands ring controls")
+            .RequiresPrivilege(Privilege.controlserver)
+            .BeginSubCommand("coverage")
+                .WithDescription("Show or set the Far Lands coverage percentage (0-100). Persists in the world config; future chunks use the new value, already-generated chunks stay as they were.")
+                .WithArgs(parsers.OptionalIntRange("percent", 0, 100))
+                .HandleWith(OnCmdCoverage)
+            .EndSubCommand()
+            .BeginSubCommand("status")
+                .WithDescription("Show the current Far Lands ring parameters (coverage, depth, band width).")
+                .HandleWith(OnCmdStatus)
+            .EndSubCommand();
+    }
+
+    private TextCommandResult OnCmdCoverage(TextCommandCallingArgs args)
+    {
+        var api = _sapi!;
+        var arg = args.Parsers[0].GetValue();
+
+        if (arg == null)
+        {
+            // No argument → report current value.
+            int current = ReadCoveragePctFromConfig();
+            return TextCommandResult.Success(
+                $"Far Lands coverage is {current}%. Depth {_depth} blocks, band width {_bandWidth} blocks. " +
+                $"Use /farlands coverage <0-100> to change it.");
+        }
+
+        int newPct = Math.Clamp((int)arg, 0, 100);
+        api.World.Config.SetString("Far Lands Coverage", newPct.ToString());
+        RecomputeRing(newPct, useEnvOverrides: false);
+
+        api.Logger.Notification(
+            "[FarLands] /farlands coverage set to {0}% by {1}. depth={2} band={3}",
+            newPct, args.Caller.GetName(), _depth, _bandWidth);
+
+        return TextCommandResult.Success(
+            $"Far Lands coverage set to {newPct}% (depth {_depth} blocks, band width {_bandWidth} blocks). " +
+            "Newly generated chunks will use the new value; already-generated chunks stay as they were.");
+    }
+
+    private TextCommandResult OnCmdStatus(TextCommandCallingArgs args)
+    {
+        int current = ReadCoveragePctFromConfig();
+        return TextCommandResult.Success(
+            $"Far Lands ring — coverage {current}%, map ({_mapSizeX}, {_mapSizeZ}), " +
+            $"depth {_depth}, band width {_bandWidth}, {_numBands} bands, tunnel lift {_tunnelLift}.");
     }
 
     private int Resolve(params string[] codes)

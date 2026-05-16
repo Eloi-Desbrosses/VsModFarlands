@@ -78,6 +78,29 @@ of the playable surface.
 On the default 1 024 000-block world at 20% coverage, the ring is about
 54 000 blocks deep from each border, with bands of about 7 700 blocks each.
 
+### In-game chat command
+
+Whether or not the dropdown is reachable in your install (1-click ZIP
+installers, for example, drop a ZIP that doesn't render the dropdown
+client-side), an admin chat command exists to set or read coverage at
+runtime:
+
+```
+/farlands coverage              # show the current value
+/farlands coverage <0-100>      # set coverage and persist to world config
+/farlands status                # show full ring parameters
+```
+
+Requires the `controlserver` privilege. The new value persists in the
+world config so it survives restarts. Newly generated chunks use the new
+ring; already-generated chunks stay as they were.
+
+The chat command path **does not honour** `VSFL_DEPTH` / `VSFL_BAND` env
+vars (it always computes depth from the chosen %). The startup path
+*does* honour them, so headless deployments that pin these env vars
+still get their pinned values on every restart unless the operator runs
+the command after boot.
+
 ### Translation-key limitation
 
 VS reads `[assembly: ModInfo]` from raw-DLL mods via metadata-only reflection,
