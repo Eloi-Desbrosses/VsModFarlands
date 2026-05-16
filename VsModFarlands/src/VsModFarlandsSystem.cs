@@ -90,10 +90,13 @@ public class VsModFarlandsSystem : ModSystem
         _mapSizeX = api.WorldManager.MapSizeX;
         _mapSizeZ = api.WorldManager.MapSizeZ;
 
-        // Coverage % is set per-world via the Customize World UI (slider 0-100, default 30).
+        // Coverage % is set per-world via the Customize World UI (dropdown, default 30).
         // Math: vanilla side = world × sqrt(1 - C), so depth = world × (1 - sqrt(1 - C)) / 2.
         // Env var VSFL_DEPTH overrides everything (Docker/server deployments).
-        int coveragePct = Math.Clamp(api.World.Config.GetInt("farLandsCoverage", 30), 0, 100);
+        // Dropdown values are stored as strings, so parse rather than GetInt.
+        string coverageStr = api.World.Config.GetString("Far Lands Coverage", "20");
+        if (!int.TryParse(coverageStr, out int coveragePct)) coveragePct = 20;
+        coveragePct = Math.Clamp(coveragePct, 0, 100);
         double coverage = coveragePct / 100.0;
         int worldMin = Math.Min(_mapSizeX, _mapSizeZ);
         int derivedDepth = (int)(worldMin * (1.0 - Math.Sqrt(1.0 - coverage)) / 2.0);

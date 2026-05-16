@@ -1,0 +1,10 @@
+{
+  "game:Far Lands Coverage": "Far Lands Coverage",
+  "game:Far Lands Coverage-desc": "Percentage of map surface covered by Far Lands biomes. 0 disables the mod, 100 makes every chunk Far Lands. Scales with your world size.",
+  "game:Far Lands Coverage-0%": "0%",
+  "game:Far Lands Coverage-20%": "20%",
+  "game:Far Lands Coverage-40%": "40%",
+  "game:Far Lands Coverage-60%": "60%",
+  "game:Far Lands Coverage-80%": "80%",
+  "game:Far Lands Coverage-100%": "100%"
+}

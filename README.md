@@ -43,27 +43,41 @@ generate than vanilla; chunks past the ring are untouched.
 
 ## Configuration
 
-When you create a new world, the **Customize** screen has a single slider:
+When you create a new world, the **Customize** screen has a single dropdown
+in the **Worldgen** category:
 
-> **Far Lands coverage (%)** — 0 to 100, default **30**.
+> **Far Lands Coverage** — `0%`, `20%`, `40%`, `60%`, `80%`, `100%`. Default `20%`.
 
 This is the fraction of your map's surface that the Far Lands ring will cover.
 The ring is anchored at each world border and scales with your world size, so
-30% on a 1 024 000-block world and 30% on a 65 000 000-block world both feel
-proportionally similar — a border crust occupying the same fraction of the
-playable surface.
+the same percentage on a 1 024 000-block world and a 65 000 000-block world
+both feel proportionally similar — a border crust occupying the same fraction
+of the playable surface.
 
 | Coverage | What you get |
 |----------|--------------|
 | 0%       | Mod is effectively disabled for this world. |
-| 10%      | Thin border crust. You'll only notice the Far Lands if you deliberately walk to a border. |
-| 30%      | Recommended. Far Lands feel like a strong border phenomenon; vanilla still dominates the playable area (~70%). |
-| 50%      | Far Lands and vanilla are roughly equal. The ring is a major destination. |
+| 20% (default) | Far Lands feel like a strong border phenomenon; vanilla dominates the playable area (~80%). |
+| 40%      | Border ring is roughly half the playable surface. |
+| 60–80%   | Vanilla becomes the minority biome. |
 | 100%     | Every chunk of the world is a Far Lands biome. No vanilla center exists. |
 
-On the default 1 024 000-block world at 30% coverage, the ring is about
-85 000 blocks deep from each border, with bands of about 12 200 blocks each.
-Every biome sits between coordinate 0 and 85 000 along either axis.
+On the default 1 024 000-block world at 20% coverage, the ring is about
+54 000 blocks deep from each border, with bands of about 7 700 blocks each.
+
+### Translation-key limitation
+
+VS reads `[assembly: ModInfo]` from raw-DLL mods via metadata-only reflection,
+which means our assembly is never fully JIT-loaded on the client before the
+Customize-World screen renders. As a result, the dropdown label and values
+display with their VS-imposed prefixes:
+
+- Label shows as `worldattribute-Far Lands Coverage`
+- Values show as `worldconfig-Far Lands Coverage-0%`, `…-20%`, etc.
+
+The text after the prefix is readable as the actual setting and value. If you
+want clean labels, add the matching entries to your local
+`<Vintagestory>/assets/game/lang/en.json` (additive, gets wiped on VS update).
 
 ### Advanced overrides (servers, Docker)
 
